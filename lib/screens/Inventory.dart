@@ -5,11 +5,9 @@ import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
-
 import '../services/db.dart';
 
 class Inventory extends StatefulWidget {
-  // final List<InventoryItem> items;
   @override
   _InventoryState createState() => _InventoryState();
 }
@@ -18,6 +16,7 @@ class _InventoryState extends State<Inventory> {
   final _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   List<Item> _inventory = [];
+  List<Item> _selections = [];
 
   @override
   void initState() {
@@ -30,6 +29,19 @@ class _InventoryState extends State<Inventory> {
     return Scaffold(
       appBar: AppBar(title: Text('Inventory')),
       body: Column(children: [
+        IconTheme(
+          data: IconThemeData(color: Theme.of(context).accentColor),
+          child: Container(
+            alignment: Alignment.bottomRight,
+              padding: EdgeInsets.all(10.0),
+              // margin: EdgeInsets.all(10.0),
+              child: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  print('delete btn');
+                },
+              )),
+        ),
         Flexible(
             child: ListView.builder(
           padding: EdgeInsets.all(8.0),
@@ -81,6 +93,13 @@ class _InventoryState extends State<Inventory> {
     _focusNode.requestFocus();
   }
 
+  void _deleteSelections() async {
+    for (Model item in _selections) {
+        db.delete(Item.table, item);
+    }
+    refresh();
+  }
+
   void refresh() async {
     List<Map<String, dynamic>> _results = await db.query(Item.table);
     _inventory = _results.map((item) => Item.fromMap(item)).toList();
@@ -98,7 +117,7 @@ class InventoryItem extends StatefulWidget {
 }
 
 class _InventoryItemState extends State<InventoryItem> {
-  bool ? _isChecked = false;
+  bool? _isChecked = false;
   @override
   Widget build(BuildContext context) {
     return Container(

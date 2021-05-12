@@ -29,7 +29,8 @@ class UltrapackApp extends StatelessWidget {
       child: MaterialApp(
           title: 'ultrapack',
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            primarySwatch: Colors.green,
+            accentColor: Colors.lightGreen,
           ),
           home: HomePage(title: 'ultrapack'),
           routes: {
