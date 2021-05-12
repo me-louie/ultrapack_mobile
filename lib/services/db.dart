@@ -24,7 +24,7 @@ abstract class db {
   
   static void onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE items_inventory (id INTEGER PRIMARY KEY, name STRING, weight INTEGER)'
+        'CREATE TABLE items_inventory (id STRING PRIMARY KEY, name STRING, weight INTEGER)'
     );
   }
 

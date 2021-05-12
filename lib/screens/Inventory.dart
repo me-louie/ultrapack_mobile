@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
+import 'package:ultrapack_mobile/models/Model.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
+
+
 import '../services/db.dart';
 
 class Inventory extends StatefulWidget {
@@ -25,15 +30,17 @@ class _InventoryState extends State<Inventory> {
     return Scaffold(
       appBar: AppBar(title: Text('Inventory')),
       body: Column(children: [
-        Flexible(child: ListView.builder(
+        Flexible(
+            child: ListView.builder(
           padding: EdgeInsets.all(8.0),
-          reverse: true,
+          // reverse: true,
           itemBuilder: (context, int index) {
             final item = _inventory[index];
-            return InventoryItem(item.name);
+            return InventoryItem(item.name, item.weight);
           },
           itemCount: _inventory.length,
         )),
+        Divider(height: 10.0),
         Container(
           decoration: BoxDecoration(color: Theme.of(context).cardColor),
           child: _buildTextComposer(),
@@ -65,13 +72,12 @@ class _InventoryState extends State<Inventory> {
         ));
   }
 
-  void _handleSubmitted(String text) {
+  void _handleSubmitted(String text) async {
     _textController.clear();
-    // InventoryItem item = InventoryItem(text, 5);
-    // setState(() {
-    //   _items.insert(0, item);
-    // });
-    // Returns focus to text field
+    Model item = Item(name: text, weight: 5);
+    await db.insert(Item.table, item);
+    setState(() {});
+    refresh();
     _focusNode.requestFocus();
   }
 
@@ -82,13 +88,38 @@ class _InventoryState extends State<Inventory> {
   }
 }
 
-class InventoryItem extends StatelessWidget{
+class InventoryItem extends StatefulWidget {
   final String name;
-  InventoryItem(this.name);
+  final int weight;
+  InventoryItem(this.name, this.weight);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(child: Text(name));
-  }
+  _InventoryItemState createState() => _InventoryItemState();
 }
 
+class _InventoryItemState extends State<InventoryItem> {
+  bool ? _isChecked = false;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(4.0),
+        margin: EdgeInsets.symmetric(horizontal: 10.0),
+        child: Column(children: [
+          CheckboxListTile(
+            title: Text('${widget.name}'),
+            subtitle: Text('${widget.weight} g'),
+            value: _isChecked,
+            onChanged: (bool? value) {
+              setState(() {
+                _isChecked = value;
+              });
+            },
+            secondary: const Icon(Icons.wb_sunny),
+          ),
+          Divider(
+            height: 2.0,
+          )
+        ]));
+  }
+}
