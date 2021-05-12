@@ -1,10 +1,32 @@
+import 'package:flutter/widgets.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
-import 'model/Counter.dart';
+import 'models/Item.dart';
+import 'services/db.dart';
+import 'models/Counter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await db.init();
+
+  var Item1 = Item(id: 1, name: 'canoe', weight: 100);
+  await db.insert('items_inventory', Item1);
+  var Item2 = Item(id: 2, name: 'canoe2', weight: 102);
+  await db.insert('items_inventory', Item2);
+
+  // List<Map<String, dynamic>> items = await db.query('items_inventory');
+  //
+  // print(List.generate(items.length, (i) {
+  //   return Item(
+  //     id: items[i]['id'],
+  //     name: items[i]['name'],
+  //     weight: items[i]['weight'],
+  //   );
+  // }));
+
   runApp(UltrapackApp());
 }
 
