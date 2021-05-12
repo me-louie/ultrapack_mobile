@@ -15,16 +15,17 @@ abstract class db {
     try {
       String _path = await getDatabasesPath() + 'items_inventory';
       _db = await openDatabase(_path, version: _version, onCreate: onCreate);
+      // _db!.execute('DELETE FROM items_inventory');
       print('db initialized!!!!!');
+      print(_path);
     }
     catch (ex) {
       print(ex);
     }
   }
-  
   static void onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE items_inventory (id STRING PRIMARY KEY, name STRING, weight INTEGER)'
+        'CREATE TABLE items_inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, name STRING, weight INTEGER)'
     );
   }
 

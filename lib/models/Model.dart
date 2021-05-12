@@ -1,5 +1,5 @@
 abstract class Model {
-  late int id;
+  late final int? id;
   toMap() {}
   static fromMap() {}
 }

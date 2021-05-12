@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -14,7 +16,9 @@ class Inventory extends StatefulWidget {
 
 class _InventoryState extends State<Inventory> {
   final _textController = TextEditingController();
+  final _weightController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final _formKey = GlobalKey<FormState>();
   List<Item> _inventory = [];
   List<Item> _selections = [];
 
@@ -32,7 +36,7 @@ class _InventoryState extends State<Inventory> {
         IconTheme(
           data: IconThemeData(color: Theme.of(context).accentColor),
           child: Container(
-            alignment: Alignment.bottomRight,
+              alignment: Alignment.bottomRight,
               padding: EdgeInsets.all(10.0),
               // margin: EdgeInsets.all(10.0),
               child: IconButton(
@@ -48,7 +52,15 @@ class _InventoryState extends State<Inventory> {
           // reverse: true,
           itemBuilder: (context, int index) {
             final item = _inventory[index];
-            return InventoryItem(item.name, item.weight);
+            return Dismissible(
+              key: UniqueKey(),
+              onDismissed: (direction) {
+                print(item);
+                db.delete(Item.table, item);
+                refresh();
+              },
+              child: InventoryItem(item.name, item.weight),
+            );
           },
           itemCount: _inventory.length,
         )),
@@ -67,38 +79,69 @@ class _InventoryState extends State<Inventory> {
         child: Row(
           children: [
             Flexible(
-              child: TextField(
-                controller: _textController,
-                onSubmitted: _handleSubmitted,
-                decoration:
-                    InputDecoration.collapsed(hintText: 'Add a new item'),
-                focusNode: _focusNode,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _textController,
+                      // onSubmitted: _handleSubmitted,
+                      decoration: InputDecoration(hintText: 'Add a new item.'),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter an item.';
+                        }
+                      },
+                      focusNode: _focusNode,
+                    ),
+                    Divider(
+                      height: 1,
+                    ),
+                    TextFormField(
+                      controller: _weightController,
+                      decoration: InputDecoration(hintText: 'Weight (g)'),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a weight.';
+                        }
+                      },
+                    )
+                  ],
+                ),
               ),
             ),
             Container(
                 margin: EdgeInsets.symmetric(horizontal: 4.0),
                 child: IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () => _handleSubmitted(_textController.text)))
+                    icon: const Icon(Icons.add_circle_outline_outlined),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _handleSubmitted(_textController.text,
+                            int.tryParse(_weightController.text)!);
+                      }
+                    }))
           ],
         ));
   }
 
-  void _handleSubmitted(String text) async {
+  void _handleSubmitted(String text, int weight) async {
     _textController.clear();
-    Model item = Item(name: text, weight: 5);
+    _weightController.clear();
+    Model item = Item(name: text, weight: weight);
     await db.insert(Item.table, item);
     setState(() {});
     refresh();
     _focusNode.requestFocus();
   }
 
-  void _deleteSelections() async {
-    for (Model item in _selections) {
-        db.delete(Item.table, item);
-    }
-    refresh();
-  }
+  // void _deleteSelections() async {
+  //   for (Model item in _selections) {
+  //     db.delete(Item.table, item);
+  //   }
+  //   refresh();
+  // }
 
   void refresh() async {
     List<Map<String, dynamic>> _results = await db.query(Item.table);
@@ -133,6 +176,9 @@ class _InventoryItemState extends State<InventoryItem> {
               setState(() {
                 _isChecked = value;
               });
+              // var selections = context.read<InventorySelections>();
+              // selections.add()
+              print(this);
             },
             secondary: const Icon(Icons.wb_sunny),
           ),
