@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
 import 'models/Item.dart';
@@ -11,12 +12,6 @@ import 'models/Counter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await db.init();
-
-  // var Item1 = Item(name: 'canoe', weight: 100);
-  // await db.insert('items_inventory', Item1);
-  // var Item2 = Item(name: 'canoe2', weight: 102);
-  // await db.insert('items_inventory', Item2);
-
   runApp(UltrapackApp());
 }
 
@@ -25,7 +20,10 @@ class UltrapackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => Counter())],
+      providers: [
+        ChangeNotifierProvider(create: (context) => Counter()),
+        ChangeNotifierProvider(create: (context) => InventorySelections())
+      ],
       child: MaterialApp(
           title: 'ultrapack',
           theme: ThemeData(

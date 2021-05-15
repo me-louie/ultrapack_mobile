@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 
 import '../services/db.dart';
 
@@ -20,7 +18,6 @@ class _InventoryState extends State<Inventory> {
   final FocusNode _focusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   List<Item> _inventory = [];
-  List<Item> _selections = [];
 
   @override
   void initState() {
@@ -42,7 +39,7 @@ class _InventoryState extends State<Inventory> {
               child: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
-                  print('delete btn');
+                  _deleteSelections();
                 },
               )),
         ),
@@ -55,11 +52,14 @@ class _InventoryState extends State<Inventory> {
             return Dismissible(
               key: UniqueKey(),
               onDismissed: (direction) {
-                print(item);
                 db.delete(Item.table, item);
                 refresh();
               },
-              child: InventoryItem(item.name, item.weight),
+              child: GestureDetector(
+                  onLongPress: () {
+                    print('long press');
+                  },
+                  child: InventoryItem(item.id, item.name, item.weight)),
             );
           },
           itemCount: _inventory.length,
@@ -85,7 +85,6 @@ class _InventoryState extends State<Inventory> {
                   children: <Widget>[
                     TextFormField(
                       controller: _textController,
-                      // onSubmitted: _handleSubmitted,
                       decoration: InputDecoration(hintText: 'Add a new item.'),
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
@@ -136,12 +135,13 @@ class _InventoryState extends State<Inventory> {
     _focusNode.requestFocus();
   }
 
-  // void _deleteSelections() async {
-  //   for (Model item in _selections) {
-  //     db.delete(Item.table, item);
-  //   }
-  //   refresh();
-  // }
+  void _deleteSelections() async {
+    var selections = context.read<InventorySelections>();
+    for (int id in selections.inventorySelections) {
+      db.deleteById(Item.table, id);
+    }
+    refresh();
+  }
 
   void refresh() async {
     List<Map<String, dynamic>> _results = await db.query(Item.table);
@@ -151,9 +151,11 @@ class _InventoryState extends State<Inventory> {
 }
 
 class InventoryItem extends StatefulWidget {
+  final int? id;
   final String name;
   final int weight;
-  InventoryItem(this.name, this.weight);
+
+  InventoryItem(this.id, this.name, this.weight);
 
   @override
   _InventoryItemState createState() => _InventoryItemState();
@@ -176,9 +178,9 @@ class _InventoryItemState extends State<InventoryItem> {
               setState(() {
                 _isChecked = value;
               });
-              // var selections = context.read<InventorySelections>();
-              // selections.add()
-              print(this);
+              var selections = context.read<InventorySelections>();
+              selections.toggleSelection(widget.id!);
+              print(selections);
             },
             secondary: const Icon(Icons.wb_sunny),
           ),

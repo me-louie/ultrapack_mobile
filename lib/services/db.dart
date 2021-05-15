@@ -44,5 +44,7 @@ abstract class db {
   static Future<int> delete(String table, Model model) async {
     return await _db!.delete(table, where: 'id = ?', whereArgs: [model.id]);
   }
-
+  static Future<int> deleteById(String table, int id) async {
+    return await _db!.delete(table, where: 'id = ?', whereArgs: [id]);
+  }
 }
