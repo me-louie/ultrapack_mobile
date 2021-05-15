@@ -63,15 +63,15 @@ class HomePage extends StatelessWidget {
                   Navigator.pushNamed(context, '/backpacks');
                 },
                 child: Text('Backpacks')),
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Consumer<Counter>(
-              builder: (context, counter, child) => Text(
-                '${counter.value}',
-                style: Theme.of(context).textTheme.headline4,
-              ),
-            ),
+            // Text(
+            //   'You have pushed the button this many times:',
+            // ),
+            // Consumer<Counter>(
+            //   builder: (context, counter, child) => Text(
+            //     '${counter.value}',
+            //     style: Theme.of(context).textTheme.headline4,
+            //   ),
+            // ),
           ],
         ),
       ),

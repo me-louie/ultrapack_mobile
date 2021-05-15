@@ -58,6 +58,8 @@ class _InventoryState extends State<Inventory> {
               child: GestureDetector(
                   onLongPress: () {
                     print('long press');
+                    // showDialog(context: context, builder: (context) => dialog);
+                    _showEditDialog(item);
                   },
                   child: InventoryItem(item.id, item.name, item.weight)),
             );
@@ -123,6 +125,68 @@ class _InventoryState extends State<Inventory> {
                     }))
           ],
         ));
+  }
+
+  Future<void> _showEditDialog(Item item) async {
+    int? id = item.id;
+    String initialName = item.name;
+    int initialWeight = item.weight;
+    final _editNameController = TextEditingController(text: initialName);
+    final _editWeightController =
+        TextEditingController(text: initialWeight.toString());
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextFormField(
+                  controller: _editNameController,
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.backpack),
+                    border: UnderlineInputBorder(),
+                    labelText: 'Item',
+                  ),
+                ),
+                TextFormField(
+                  controller: _editWeightController,
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.account_tree),
+                      border: UnderlineInputBorder(),
+                      labelText: 'Weight (g)'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              style: TextButton.styleFrom(primary: Colors.black),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Confirm'),
+              onPressed: () {
+                if (initialName != _editNameController.text || initialWeight != int.tryParse(_editWeightController.text)!) {
+                  Model updated = Item(
+                      id: id,
+                      name: _editNameController.text,
+                      weight: int.tryParse(_editWeightController.text)!);
+                  db.update(Item.table, updated);
+                  refresh();
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _handleSubmitted(String text, int weight) async {
