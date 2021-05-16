@@ -34,6 +34,7 @@ class _BackpacksState extends State<Backpacks> {
           child: ElevatedButton.icon(
             onPressed: () {
               print('new bp');
+              Navigator.pushNamed(context, '/newbackpack');
             },
             icon: Icon(Icons.add_circle),
             label: Text('Pack a new backpack'),

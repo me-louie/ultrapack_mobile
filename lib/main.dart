@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
+import 'package:ultrapack_mobile/screens/NewBackpack.dart';
 import 'models/Backpack.dart';
 import 'services/backpacks_db.dart';
 import 'services/items_db.dart';
@@ -19,9 +20,9 @@ void main() async {
   //     description: 'Our fav snowshoeing destination',
   //     weight: 0);
   // BackpacksDB.insert(Backpack.table, elfin);
-  Backpack pano = Backpack(
-      name: 'Panorama Ridge', description: 'Miki\'s fav hike in BC', weight: 0);
-  BackpacksDB.insert(Backpack.table, pano);
+  // Backpack pano = Backpack(
+  //     name: 'Panorama Ridge', description: 'Miki\'s fav hike in BC', weight: 0);
+  // BackpacksDB.insert(Backpack.table, pano);
   runApp(UltrapackApp());
 }
 
@@ -43,7 +44,8 @@ class UltrapackApp extends StatelessWidget {
           home: HomePage(title: 'ultrapack'),
           routes: {
             '/inventory': (context) => Inventory(),
-            '/backpacks': (context) => Backpacks()
+            '/backpacks': (context) => Backpacks(),
+            '/newbackpack': (context) => NewBackpack()
           }),
     );
   }
