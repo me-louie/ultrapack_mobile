@@ -1,17 +1,27 @@
 import 'package:flutter/widgets.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
-import 'models/Item.dart';
-import 'services/db.dart';
+import 'models/Backpack.dart';
+import 'services/backpacks_db.dart';
+import 'services/items_db.dart';
 import 'models/Counter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await db.init();
+  await ItemsDB.init();
+  await BackpacksDB.init();
+
+  // Backpack elfin = Backpack(
+  //     name: 'Elfin Lakes',
+  //     description: 'Our fav snowshoeing destination',
+  //     weight: 0);
+  // BackpacksDB.insert(Backpack.table, elfin);
+  Backpack pano = Backpack(
+      name: 'Panorama Ridge', description: 'Miki\'s fav hike in BC', weight: 0);
+  BackpacksDB.insert(Backpack.table, pano);
   runApp(UltrapackApp());
 }
 
@@ -50,10 +60,17 @@ class HomePage extends StatelessWidget {
         title: Text(title!),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: GridView.count(
+          primary: false,
+          padding: const EdgeInsets.all(20),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          crossAxisCount: 2,
           children: <Widget>[
             ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.lightGreen)),
                 onPressed: () {
                   Navigator.pushNamed(context, '/inventory');
                 },
@@ -75,14 +92,14 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          var counter = context.read<Counter>();
-          counter.incrementCounter();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     var counter = context.read<Counter>();
+      //     counter.incrementCounter();
+      //   },
+      //   tooltip: 'Increment',
+      //   child: Icon(Icons.add),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

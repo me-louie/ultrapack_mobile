@@ -5,7 +5,7 @@ import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 
-import '../services/db.dart';
+import '../services/items_db.dart';
 
 class Inventory extends StatefulWidget {
   @override
@@ -35,7 +35,6 @@ class _InventoryState extends State<Inventory> {
           child: Container(
               alignment: Alignment.bottomRight,
               padding: EdgeInsets.all(10.0),
-              // margin: EdgeInsets.all(10.0),
               child: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
@@ -46,19 +45,16 @@ class _InventoryState extends State<Inventory> {
         Flexible(
             child: ListView.builder(
           padding: EdgeInsets.all(8.0),
-          // reverse: true,
           itemBuilder: (context, int index) {
             final item = _inventory[index];
             return Dismissible(
               key: UniqueKey(),
               onDismissed: (direction) {
-                db.delete(Item.table, item);
+                ItemsDB.delete(Item.table, item);
                 refresh();
               },
               child: GestureDetector(
                   onLongPress: () {
-                    print('long press');
-                    // showDialog(context: context, builder: (context) => dialog);
                     _showEditDialog(item);
                   },
                   child: InventoryItem(item.id, item.name, item.weight)),
@@ -146,15 +142,17 @@ class _InventoryState extends State<Inventory> {
                 TextFormField(
                   controller: _editNameController,
                   decoration: InputDecoration(
-                    icon: Icon(Icons.backpack),
+                    icon: Icon(Icons.backpack_rounded),
                     border: UnderlineInputBorder(),
                     labelText: 'Item',
                   ),
                 ),
                 TextFormField(
                   controller: _editWeightController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
-                      icon: Icon(Icons.account_tree),
+                      icon: Icon(Icons.fitness_center),
                       border: UnderlineInputBorder(),
                       labelText: 'Weight (g)'),
                 ),
@@ -172,12 +170,14 @@ class _InventoryState extends State<Inventory> {
             TextButton(
               child: Text('Confirm'),
               onPressed: () {
-                if (initialName != _editNameController.text || initialWeight != int.tryParse(_editWeightController.text)!) {
+                if (initialName != _editNameController.text ||
+                    initialWeight !=
+                        int.tryParse(_editWeightController.text)!) {
                   Model updated = Item(
                       id: id,
                       name: _editNameController.text,
                       weight: int.tryParse(_editWeightController.text)!);
-                  db.update(Item.table, updated);
+                  ItemsDB.update(Item.table, updated);
                   refresh();
                 }
                 Navigator.of(context).pop();
@@ -193,7 +193,7 @@ class _InventoryState extends State<Inventory> {
     _textController.clear();
     _weightController.clear();
     Model item = Item(name: text, weight: weight);
-    await db.insert(Item.table, item);
+    await ItemsDB.insert(Item.table, item);
     setState(() {});
     refresh();
     _focusNode.requestFocus();
@@ -202,13 +202,13 @@ class _InventoryState extends State<Inventory> {
   void _deleteSelections() async {
     var selections = context.read<InventorySelections>();
     for (int id in selections.inventorySelections) {
-      db.deleteById(Item.table, id);
+      ItemsDB.deleteById(Item.table, id);
     }
     refresh();
   }
 
   void refresh() async {
-    List<Map<String, dynamic>> _results = await db.query(Item.table);
+    List<Map<String, dynamic>> _results = await ItemsDB.query(Item.table);
     _inventory = _results.map((item) => Item.fromMap(item)).toList();
     setState(() {});
   }
@@ -243,8 +243,6 @@ class _InventoryItemState extends State<InventoryItem> {
                 _isChecked = value;
               });
               var selections = context.read<InventorySelections>();
-              selections.toggleSelection(widget.id!);
-              print(selections);
             },
             secondary: const Icon(Icons.wb_sunny),
           ),
