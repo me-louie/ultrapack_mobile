@@ -28,11 +28,14 @@ class InventorySelections extends ChangeNotifier {
   //   }
   // }
   void toggleSelection(int id) {
-    if (inventorySelections.contains(id)){
+    print('toggleSelection');
+    if (inventorySelections.contains(id)) {
       inventorySelections.remove(id);
     } else {
       inventorySelections.add(id);
     }
+
+    print(this.size);
     notifyListeners();
   }
 }

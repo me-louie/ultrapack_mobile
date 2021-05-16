@@ -243,6 +243,7 @@ class _InventoryItemState extends State<InventoryItem> {
                 _isChecked = value;
               });
               var selections = context.read<InventorySelections>();
+              selections.toggleSelection(widget.id!);
             },
             secondary: const Icon(Icons.wb_sunny),
           ),
