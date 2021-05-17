@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
-
-import '../services/items_db.dart';
+import 'package:ultrapack_mobile/services/db.dart';
 
 class Inventory extends StatefulWidget {
   @override
@@ -50,7 +49,7 @@ class _InventoryState extends State<Inventory> {
             return Dismissible(
               key: UniqueKey(),
               onDismissed: (direction) {
-                ItemsDB.delete(Item.table, item);
+                DB.delete(Item.table, item);
                 refresh();
               },
               child: GestureDetector(
@@ -177,7 +176,7 @@ class _InventoryState extends State<Inventory> {
                       id: id,
                       name: _editNameController.text,
                       weight: int.tryParse(_editWeightController.text)!);
-                  ItemsDB.update(Item.table, updated);
+                  DB.update(Item.table, updated);
                   refresh();
                 }
                 Navigator.of(context).pop();
@@ -193,7 +192,7 @@ class _InventoryState extends State<Inventory> {
     _textController.clear();
     _weightController.clear();
     Model item = Item(name: text, weight: weight);
-    await ItemsDB.insert(Item.table, item);
+    await DB.insert(Item.table, item);
     setState(() {});
     refresh();
     _focusNode.requestFocus();
@@ -202,13 +201,13 @@ class _InventoryState extends State<Inventory> {
   void _deleteSelections() async {
     var selections = context.read<InventorySelections>();
     for (int id in selections.inventorySelections) {
-      ItemsDB.deleteById(Item.table, id);
+      DB.deleteById(Item.table, id);
     }
     refresh();
   }
 
   void refresh() async {
-    List<Map<String, dynamic>> _results = await ItemsDB.query(Item.table);
+    List<Map<String, dynamic>> _results = await DB.query(Item.table);
     _inventory = _results.map((item) => Item.fromMap(item)).toList();
     setState(() {});
   }

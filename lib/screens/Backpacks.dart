@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ultrapack_mobile/models/Backpack.dart';
-import 'package:ultrapack_mobile/services/backpacks_db.dart';
+import 'package:ultrapack_mobile/screens/MyBackpack.dart';
+import 'package:ultrapack_mobile/services/db.dart';
 
 class Backpacks extends StatefulWidget {
   @override
@@ -17,8 +18,7 @@ class _BackpacksState extends State<Backpacks> {
   }
 
   void refresh() async {
-    List<Map<String, dynamic>> _results =
-        await BackpacksDB.query(Backpack.table);
+    List<Map<String, dynamic>> _results = await DB.query(Backpack.table);
     _backpacks = _results.map((bp) => Backpack.fromMap(bp)).toList();
     setState(() {});
   }
@@ -66,27 +66,38 @@ class BackpackListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return InkWell(
+      onTap: () {
+        Feedback.forTap(context);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MyBackpack(title, description, weight)));
+      },
+      child: Card(
         child: Padding(
-      padding: EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(Icons.backpack_rounded),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${title}', style: Theme.of(context).textTheme.bodyText1),
-                Text('${description}',
-                    style: Theme.of(context).textTheme.bodyText2),
-                Text('Pack Weight (g): ${weight}')
-              ],
-            ),
-          )
-        ],
+          padding: EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Icon(Icons.backpack_rounded),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$title',
+                        style: Theme.of(context).textTheme.bodyText1),
+                    Text('$description',
+                        style: Theme.of(context).textTheme.bodyText2),
+                    Text('Pack Weight (g): $weight')
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 }

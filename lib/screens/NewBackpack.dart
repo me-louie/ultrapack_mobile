@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ultrapack_mobile/models/Backpack.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
-import 'package:ultrapack_mobile/services/backpacks_db.dart';
+import 'package:ultrapack_mobile/services/db.dart';
+
+import 'MyBackpack.dart';
 
 class NewBackpack extends StatefulWidget {
   @override
@@ -39,14 +41,16 @@ class _NewBackpackState extends State<NewBackpack> {
             if (formKeys[_index].currentState!.validate()) {
               if (_index >= 1) {
                 print('last');
-                print(_nameController.text);
-                print(_descriptionController.text);
+                String name = _nameController.text;
+                String description = _descriptionController.text;
                 Model backpack = new Backpack(
-                    name: _nameController.text,
-                    description: _descriptionController.text,
-                    weight: 0);
-                BackpacksDB.insert(Backpack.table, backpack);
-                Navigator.pop(context);
+                    name: name, description: description, weight: 0);
+                DB.insert(Backpack.table, backpack);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            MyBackpack(name, description, 0)));
                 return;
               }
               setState(() {

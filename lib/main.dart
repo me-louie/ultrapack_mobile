@@ -5,24 +5,22 @@ import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
 import 'package:ultrapack_mobile/screens/NewBackpack.dart';
-import 'models/Backpack.dart';
-import 'services/backpacks_db.dart';
-import 'services/items_db.dart';
+import 'package:ultrapack_mobile/services/db.dart';
+import 'models/ItemsBackpacks.dart';
 import 'models/Counter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ItemsDB.init();
-  await BackpacksDB.init();
+  await DB.init();
 
-  // Backpack elfin = Backpack(
-  //     name: 'Elfin Lakes',
-  //     description: 'Our fav snowshoeing destination',
-  //     weight: 0);
-  // BackpacksDB.insert(Backpack.table, elfin);
-  // Backpack pano = Backpack(
-  //     name: 'Panorama Ridge', description: 'Miki\'s fav hike in BC', weight: 0);
-  // BackpacksDB.insert(Backpack.table, pano);
+  var item1 = ItemsBackpacks(itemId: 1, backpackId: 1);
+  // var item2 = ItemsBackpacks(itemId: 1, backpackId: 2);
+  // var item3 = ItemsBackpacks(itemId: 2, backpackId: 1);
+  // //
+  // DB.insert(ItemsBackpacks.table, item1);
+  // DB.insert(ItemsBackpacks.table, item2);
+  // DB.insert(ItemsBackpacks.table, item3);
+  await DB.getBackpackItems(ItemsBackpacks.table, item1);
   runApp(UltrapackApp());
 }
 
@@ -45,7 +43,7 @@ class UltrapackApp extends StatelessWidget {
           routes: {
             '/inventory': (context) => Inventory(),
             '/backpacks': (context) => Backpacks(),
-            '/newbackpack': (context) => NewBackpack()
+            '/newbackpack': (context) => NewBackpack(),
           }),
     );
   }
