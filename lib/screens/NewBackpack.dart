@@ -37,20 +37,20 @@ class _NewBackpackState extends State<NewBackpack> {
               _index--;
             });
           },
-          onStepContinue: () {
+          onStepContinue: () async {
             if (formKeys[_index].currentState!.validate()) {
               if (_index >= 1) {
                 print('last');
                 String name = _nameController.text;
                 String description = _descriptionController.text;
-                Model backpack = new Backpack(
-                    name: name, description: description, weight: 0);
-                DB.insert(Backpack.table, backpack);
+                Model backpack =
+                    new Backpack(name: name, description: description);
+                int id = await DB.insert(Backpack.table, backpack);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            MyBackpack(name, description, 0)));
+                            MyBackpack(id, name, description, 0)));
                 return;
               }
               setState(() {

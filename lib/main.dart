@@ -6,21 +6,11 @@ import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
 import 'package:ultrapack_mobile/screens/NewBackpack.dart';
 import 'package:ultrapack_mobile/services/db.dart';
-import 'models/ItemsBackpacks.dart';
 import 'models/Counter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DB.init();
-
-  var item1 = ItemsBackpacks(itemId: 1, backpackId: 1);
-  // var item2 = ItemsBackpacks(itemId: 1, backpackId: 2);
-  // var item3 = ItemsBackpacks(itemId: 2, backpackId: 1);
-  // //
-  // DB.insert(ItemsBackpacks.table, item1);
-  // DB.insert(ItemsBackpacks.table, item2);
-  // DB.insert(ItemsBackpacks.table, item3);
-  await DB.getBackpackItems(ItemsBackpacks.table, item1);
   runApp(UltrapackApp());
 }
 
@@ -80,26 +70,9 @@ class HomePage extends StatelessWidget {
                   Navigator.pushNamed(context, '/backpacks');
                 },
                 child: Text('Backpacks')),
-            // Text(
-            //   'You have pushed the button this many times:',
-            // ),
-            // Consumer<Counter>(
-            //   builder: (context, counter, child) => Text(
-            //     '${counter.value}',
-            //     style: Theme.of(context).textTheme.headline4,
-            //   ),
-            // ),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     var counter = context.read<Counter>();
-      //     counter.incrementCounter();
-      //   },
-      //   tooltip: 'Increment',
-      //   child: Icon(Icons.add),
-      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

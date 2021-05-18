@@ -15,19 +15,20 @@ abstract class DB {
       database =
           openDatabase(join(await getDatabasesPath(), 'ultrapack_database.db'),
               onCreate: (db, version) async {
-        await db.execute(
-            'CREATE TABLE items_inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, name STRING, weight INTEGER)');
+        await db.execute('CREATE TABLE items_inventory ('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name STRING, '
+            'weight INTEGER)');
 
         await db.execute('CREATE TABLE backpacks ('
             'id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'name STRING, '
-            'description STRING, '
-            'weight INTEGER)');
-        await db.execute(
-            'CREATE TABLE items_backpacks ( itemId INTEGER, backpackId INTEGER )');
+            'description STRING)');
+        await db.execute('CREATE TABLE items_backpacks ('
+            'itemId INTEGER, '
+            'backpackId INTEGER, '
+            'PRIMARY KEY(itemId, backpackId))');
       }, version: 1);
-      Database db = (await database)!;
-      print('db initialized!!!!!');
     } catch (ex) {
       print(ex);
     }
@@ -60,12 +61,34 @@ abstract class DB {
     return await _db.delete(table, where: 'id = ?', whereArgs: [id]);
   }
 
-  static Future<List<Map<String, dynamic>>> getBackpackItems(
-      String table, Model backpack) async {
+  static Future<int> deleteBackpackItem(
+      String table, int itemId, int backpackId) async {
+    final Database _db = (await database)!;
+    return await _db.delete(table,
+        where: 'itemId = ? AND backpackId = ?',
+        whereArgs: [itemId, backpackId]);
+  }
+
+  static Future<List<Map<String, dynamic>>> getBackpackItems(int id) async {
     final Database _db = (await database)!;
     List<Map<String, dynamic>> list = await _db.rawQuery(
-        'SELECT items_inventory.name FROM items_inventory INNER JOIN items_backpacks ON items_inventory.id = items_backpacks.itemId WHERE items_backpacks.backpackId = 1');
-    print(list);
+        'SELECT items_inventory.name, items_inventory.weight, items_inventory.id '
+        'FROM items_inventory '
+        'INNER JOIN items_backpacks '
+        'ON items_inventory.id = items_backpacks.itemId '
+        'WHERE items_backpacks.backpackId = $id');
     return list;
+  }
+
+  static Future<int> getBackpackWeight(int id) async {
+    final Database _db = (await database)!;
+    List<Map<String, dynamic>> result =
+        await _db.rawQuery('SELECT COALESCE(SUM(weight), 0) as TotalWeight '
+            'FROM items_inventory '
+            'INNER JOIN items_backpacks '
+            'ON items_inventory.id = items_backpacks.itemId '
+            'WHERE items_backpacks.backpackId = $id');
+    int value = result[0]["TotalWeight"];
+    return value;
   }
 }

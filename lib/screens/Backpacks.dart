@@ -25,7 +25,6 @@ class _BackpacksState extends State<Backpacks> {
 
   @override
   Widget build(BuildContext context) {
-    // final List<int> colorCodes = <int>[600, 500, 100];
     return Scaffold(
       appBar: AppBar(title: Text('Backpacks')),
       body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -33,7 +32,6 @@ class _BackpacksState extends State<Backpacks> {
           margin: const EdgeInsets.all(15),
           child: ElevatedButton.icon(
             onPressed: () {
-              print('new bp');
               Navigator.pushNamed(context, '/newbackpack');
             },
             icon: Icon(Icons.add_circle),
@@ -46,9 +44,10 @@ class _BackpacksState extends State<Backpacks> {
           itemCount: _backpacks.length,
           itemBuilder: (BuildContext context, int index) {
             return BackpackListItem(
-                title: _backpacks[index].name,
-                description: _backpacks[index].description,
-                weight: _backpacks[index].weight);
+              id: _backpacks[index].id,
+              title: _backpacks[index].name,
+              description: _backpacks[index].description,
+            );
           },
         ))
       ]),
@@ -56,13 +55,33 @@ class _BackpacksState extends State<Backpacks> {
   }
 }
 
-class BackpackListItem extends StatelessWidget {
-  const BackpackListItem(
-      {required this.title, required this.description, required this.weight});
-
+class BackpackListItem extends StatefulWidget {
+  const BackpackListItem({
+    this.id,
+    required this.title,
+    required this.description,
+  });
+  final int? id;
   final String title;
   final String description;
-  final int weight;
+
+  @override
+  _BackpackListItemState createState() => _BackpackListItemState();
+}
+
+class _BackpackListItemState extends State<BackpackListItem> {
+  int weight = 0;
+
+  @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
+
+  void refresh() async {
+    weight = await DB.getBackpackWeight(widget.id!);
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +91,8 @@ class BackpackListItem extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MyBackpack(title, description, weight)));
+                builder: (context) => MyBackpack(
+                    widget.id!, widget.title, widget.description, weight)));
       },
       child: Card(
         child: Padding(
@@ -86,9 +106,9 @@ class BackpackListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$title',
+                    Text('${widget.title}',
                         style: Theme.of(context).textTheme.bodyText1),
-                    Text('$description',
+                    Text('${widget.description}',
                         style: Theme.of(context).textTheme.bodyText2),
                     Text('Pack Weight (g): $weight')
                   ],

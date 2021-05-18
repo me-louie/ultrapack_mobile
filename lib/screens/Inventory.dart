@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:ultrapack_mobile/models/Backpack.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
+import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 
@@ -16,7 +18,9 @@ class _InventoryState extends State<Inventory> {
   final _weightController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
+
   List<Item> _inventory = [];
+  List<Backpack> _backpacks = [];
 
   @override
   void initState() {
@@ -31,15 +35,29 @@ class _InventoryState extends State<Inventory> {
       body: Column(children: [
         IconTheme(
           data: IconThemeData(color: Theme.of(context).accentColor),
-          child: Container(
-              alignment: Alignment.bottomRight,
-              padding: EdgeInsets.all(10.0),
-              child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  _deleteSelections();
-                },
-              )),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Theme.of(context).accentColor, // background
+                    onPrimary: Colors.white, // foreground
+                  ),
+                  onPressed: () {
+                    _openBackpackDialog();
+                  },
+                  child: Text('Add To Pack')),
+              Container(
+                  alignment: Alignment.bottomRight,
+                  padding: EdgeInsets.all(10.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      _deleteSelections();
+                    },
+                  ))
+            ],
+          ),
         ),
         Flexible(
             child: ListView.builder(
@@ -120,6 +138,36 @@ class _InventoryState extends State<Inventory> {
                     }))
           ],
         ));
+  }
+
+  Future<void> _openBackpackDialog() async {
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(title: Text('Backpacks'), children: <Widget>[
+            Column(
+              children: List.generate(
+                  _backpacks.length,
+                  (index) => SimpleDialogOption(
+                      onPressed: () {
+                        var selections = context.read<InventorySelections>();
+                        for (int id in selections.inventorySelections) {
+                          Model ibp = ItemsBackpacks(
+                              itemId: id, backpackId: (_backpacks[index].id)!);
+                          DB.insert(ItemsBackpacks.table, ibp);
+                        }
+                        selections.clear();
+                        refresh();
+                        Navigator.pop(context);
+                        final snackBar = SnackBar(
+                            content: Text(
+                                'Items added to ${_backpacks[index].name}'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      },
+                      child: Text(_backpacks[index].name))),
+            )
+          ]);
+        });
   }
 
   Future<void> _showEditDialog(Item item) async {
@@ -209,6 +257,11 @@ class _InventoryState extends State<Inventory> {
   void refresh() async {
     List<Map<String, dynamic>> _results = await DB.query(Item.table);
     _inventory = _results.map((item) => Item.fromMap(item)).toList();
+
+    List<Map<String, dynamic>> _backpacksResults =
+        await DB.query(Backpack.table);
+    _backpacks = _backpacksResults.map((bp) => Backpack.fromMap(bp)).toList();
+    print(_backpacks);
     setState(() {});
   }
 }
@@ -225,9 +278,12 @@ class InventoryItem extends StatefulWidget {
 }
 
 class _InventoryItemState extends State<InventoryItem> {
-  bool? _isChecked = false;
+  bool? _isChecked;
   @override
   Widget build(BuildContext context) {
+    var selections = context.read<InventorySelections>();
+    _isChecked = selections.contains(widget.id!);
+
     return Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(4.0),

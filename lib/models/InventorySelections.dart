@@ -11,22 +11,6 @@ class InventorySelections extends ChangeNotifier {
     return inventorySelections.length;
   }
 
-  // bool hasSelections() {
-  //   return inventorySelections.length > 0;
-  // }
-  // void add(int id) {
-  //   if (!inventorySelections.contains(id)){
-  //     inventorySelections.add(id);
-  //     notifyListeners();
-  //   }
-  // }
-  //
-  // void remove(int id){
-  //   if (inventorySelections.contains(id)){
-  //     inventorySelections.remove(id);
-  //     notifyListeners();
-  //   }
-  // }
   void toggleSelection(int id) {
     print('toggleSelection');
     if (inventorySelections.contains(id)) {
@@ -34,8 +18,14 @@ class InventorySelections extends ChangeNotifier {
     } else {
       inventorySelections.add(id);
     }
-
-    print(this.size);
     notifyListeners();
+  }
+
+  void clear() {
+    inventorySelections = {};
+  }
+
+  bool contains(int id) {
+    return inventorySelections.contains(id);
   }
 }

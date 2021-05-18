@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:ultrapack_mobile/models/Item.dart';
+import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
+import 'package:ultrapack_mobile/services/db.dart';
 
 class MyBackpack extends StatefulWidget {
   final String name;
   final String description;
-  int weight;
-  MyBackpack(this.name, this.description, this.weight);
+  final int id;
+  final int weight;
+
+  MyBackpack(this.id, this.name, this.description, this.weight);
 
   @override
   _MyBackpackState createState() => _MyBackpackState();
 }
 
 class _MyBackpackState extends State<MyBackpack> {
+  List<Item> _items = [];
+
+  @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
+
+  void refresh() async {
+    List<Map<String, dynamic>> _results = await DB.getBackpackItems(widget.id);
+    _items = _results.map((item) => Item.fromMap(item)).toList();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,19 +48,44 @@ class _MyBackpackState extends State<MyBackpack> {
                           EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Text('${widget.name}',
-                          //     style: Theme.of(context).textTheme.bodyText1),
-                          // Text('${widget.description}',
-                          //     style: Theme.of(context).textTheme.bodyText2),
-                          Text('Pack Weight (g): ${widget.weight}')
-                        ],
+                        children: [Text('Pack Weight (g): ${widget.weight}')],
                       ),
                     )
                   ],
                 ),
               ),
             ),
+            Flexible(
+              child: ListView.builder(
+                  itemCount: _items.length,
+                  itemBuilder: (context, int index) {
+                    return Container(
+                      padding: EdgeInsets.all(4.0),
+                      margin: EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Column(
+                        children: [
+                          Dismissible(
+                            key: UniqueKey(),
+                            onDismissed: (direction) {
+                              print(_items[index].id);
+                              DB.deleteBackpackItem(ItemsBackpacks.table,
+                                  _items[index].id!, widget.id);
+                              refresh();
+                            },
+                            child: ListTile(
+                              title: Text(_items[index].name),
+                              subtitle:
+                                  Text('${_items[index].weight.toString()} g'),
+                            ),
+                          ),
+                          Divider(
+                            height: 2.0,
+                          )
+                        ],
+                      ),
+                    );
+                  }),
+            )
           ],
         ));
   }
