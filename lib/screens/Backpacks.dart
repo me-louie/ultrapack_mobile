@@ -70,7 +70,7 @@ class BackpackListItem extends StatefulWidget {
 }
 
 class _BackpackListItemState extends State<BackpackListItem> {
-  int weight = 0;
+  int _weight = 0;
 
   @override
   void initState() {
@@ -79,7 +79,7 @@ class _BackpackListItemState extends State<BackpackListItem> {
   }
 
   void refresh() async {
-    weight = await DB.getBackpackWeight(widget.id!);
+    _weight = await DB.getBackpackWeight(widget.id!);
     setState(() {});
   }
 
@@ -91,8 +91,8 @@ class _BackpackListItemState extends State<BackpackListItem> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MyBackpack(
-                    widget.id!, widget.title, widget.description, weight)));
+                builder: (context) =>
+                    MyBackpack(widget.id!, widget.title, widget.description)));
       },
       child: Card(
         child: Padding(
@@ -110,7 +110,7 @@ class _BackpackListItemState extends State<BackpackListItem> {
                         style: Theme.of(context).textTheme.bodyText1),
                     Text('${widget.description}',
                         style: Theme.of(context).textTheme.bodyText2),
-                    Text('Pack Weight (g): $weight')
+                    Text('Pack Weight (g): $_weight')
                   ],
                 ),
               )

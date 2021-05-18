@@ -7,9 +7,8 @@ class MyBackpack extends StatefulWidget {
   final String name;
   final String description;
   final int id;
-  final int weight;
 
-  MyBackpack(this.id, this.name, this.description, this.weight);
+  MyBackpack(this.id, this.name, this.description);
 
   @override
   _MyBackpackState createState() => _MyBackpackState();
@@ -17,6 +16,7 @@ class MyBackpack extends StatefulWidget {
 
 class _MyBackpackState extends State<MyBackpack> {
   List<Item> _items = [];
+  int _weight = 0;
 
   @override
   void initState() {
@@ -27,6 +27,7 @@ class _MyBackpackState extends State<MyBackpack> {
   void refresh() async {
     List<Map<String, dynamic>> _results = await DB.getBackpackItems(widget.id);
     _items = _results.map((item) => Item.fromMap(item)).toList();
+    _weight = await DB.getBackpackWeight(widget.id);
     setState(() {});
   }
 
@@ -48,7 +49,7 @@ class _MyBackpackState extends State<MyBackpack> {
                           EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [Text('Pack Weight (g): ${widget.weight}')],
+                        children: [Text('Pack Weight (g): $_weight')],
                       ),
                     )
                   ],

@@ -50,7 +50,7 @@ class _NewBackpackState extends State<NewBackpack> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            MyBackpack(id, name, description, 0)));
+                            MyBackpack(id, name, description)));
                 return;
               }
               setState(() {
