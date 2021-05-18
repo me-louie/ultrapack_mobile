@@ -6,7 +6,6 @@ import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory.dart';
 import 'package:ultrapack_mobile/screens/NewBackpack.dart';
 import 'package:ultrapack_mobile/services/db.dart';
-import 'models/Counter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +19,6 @@ class UltrapackApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => Counter()),
         ChangeNotifierProvider(create: (context) => InventorySelections())
       ],
       child: MaterialApp(
