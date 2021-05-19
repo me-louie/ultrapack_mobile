@@ -34,7 +34,9 @@ class _MyBackpackState extends State<MyBackpack> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('${widget.name}')),
+        appBar: AppBar(
+          title: Text('${widget.name}'),
+        ),
         body: Column(
           children: [
             Card(

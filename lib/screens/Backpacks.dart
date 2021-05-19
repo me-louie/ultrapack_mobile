@@ -26,7 +26,9 @@ class _BackpacksState extends State<Backpacks> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Backpacks')),
+      appBar: AppBar(
+        title: Text('Backpacks'),
+      ),
       body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Container(
           margin: const EdgeInsets.all(15),

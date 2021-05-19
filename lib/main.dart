@@ -29,6 +29,7 @@ class UltrapackApp extends StatelessWidget {
           ),
           home: HomePage(title: 'ultrapack'),
           routes: {
+            // '/': (context) => HomePage(),
             '/inventory': (context) => Inventory(),
             '/backpacks': (context) => Backpacks(),
             '/newbackpack': (context) => NewBackpack(),
@@ -45,7 +46,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title!),
+        title: Text('Ultrapack'),
       ),
       body: Center(
         child: GridView.count(

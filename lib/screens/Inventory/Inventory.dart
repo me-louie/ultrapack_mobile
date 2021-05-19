@@ -204,7 +204,6 @@ class _InventoryState extends State<Inventory> {
     List<Map<String, dynamic>> _backpacksResults =
         await DB.query(Backpack.table);
     _backpacks = _backpacksResults.map((bp) => Backpack.fromMap(bp)).toList();
-    print(_backpacks);
     setState(() {});
   }
 }
