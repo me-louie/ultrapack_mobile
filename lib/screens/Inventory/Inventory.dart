@@ -7,6 +7,8 @@ import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 
+import 'EditInventoryItemDialog.dart';
+
 class Inventory extends StatefulWidget {
   @override
   _InventoryState createState() => _InventoryState();
@@ -25,6 +27,14 @@ class _InventoryState extends State<Inventory> {
   void initState() {
     refresh();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _weightController.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,8 +80,13 @@ class _InventoryState extends State<Inventory> {
                 refresh();
               },
               child: GestureDetector(
-                  onLongPress: () {
-                    _showEditDialog(item);
+                  onLongPress: () async {
+                    //  _showEditDialog(item);
+                    await showDialog(
+                        context: context,
+                        builder: (_) => EditInventoryItemDialog(
+                            item: item,
+                            updateInventoryList: () => {refresh()}));
                   },
                   child: InventoryItem(item.id, item.name, item.weight)),
             );
@@ -162,72 +177,6 @@ class _InventoryState extends State<Inventory> {
             )
           ]);
         });
-  }
-
-  Future<void> _showEditDialog(Item item) async {
-    int? id = item.id;
-    String initialName = item.name;
-    int initialWeight = item.weight;
-    final _editNameController = TextEditingController(text: initialName);
-    final _editWeightController =
-        TextEditingController(text: initialWeight.toString());
-
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Edit'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextFormField(
-                  controller: _editNameController,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.backpack_rounded),
-                    border: UnderlineInputBorder(),
-                    labelText: 'Item',
-                  ),
-                ),
-                TextFormField(
-                  controller: _editWeightController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.fitness_center),
-                      border: UnderlineInputBorder(),
-                      labelText: 'Weight (g)'),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              style: TextButton.styleFrom(primary: Colors.black),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Confirm'),
-              onPressed: () {
-                if (initialName != _editNameController.text ||
-                    initialWeight !=
-                        int.tryParse(_editWeightController.text)!) {
-                  Model updated = Item(
-                      id: id,
-                      name: _editNameController.text,
-                      weight: int.tryParse(_editWeightController.text)!);
-                  DB.update(Item.table, updated);
-                  refresh();
-                }
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _handleSubmitted(String text, int weight) async {

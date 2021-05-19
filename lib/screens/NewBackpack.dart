@@ -6,7 +6,7 @@ import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 import 'package:provider/provider.dart';
 
-import 'Inventory.dart';
+import 'Inventory/Inventory.dart';
 import 'MyBackpack.dart';
 
 class NewBackpack extends StatefulWidget {

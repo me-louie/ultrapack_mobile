@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
-import 'package:ultrapack_mobile/screens/Inventory.dart';
+import 'package:ultrapack_mobile/screens/Inventory/Inventory.dart';
 import 'package:ultrapack_mobile/screens/NewBackpack.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 
