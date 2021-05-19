@@ -44,10 +44,10 @@ class _BackpacksState extends State<Backpacks> {
           itemCount: _backpacks.length,
           itemBuilder: (BuildContext context, int index) {
             return BackpackListItem(
-              id: _backpacks[index].id,
-              title: _backpacks[index].name,
-              description: _backpacks[index].description,
-            );
+                id: _backpacks[index].id,
+                title: _backpacks[index].name,
+                description: _backpacks[index].description,
+                updateBackpackList: () => {refresh()});
           },
         ))
       ]),
@@ -55,15 +55,18 @@ class _BackpacksState extends State<Backpacks> {
   }
 }
 
+enum Options { edit, delete }
+
 class BackpackListItem extends StatefulWidget {
-  const BackpackListItem({
-    this.id,
-    required this.title,
-    required this.description,
-  });
+  const BackpackListItem(
+      {this.id,
+      required this.title,
+      required this.description,
+      required this.updateBackpackList});
   final int? id;
   final String title;
   final String description;
+  final Function updateBackpackList;
 
   @override
   _BackpackListItemState createState() => _BackpackListItemState();
@@ -98,26 +101,92 @@ class _BackpackListItemState extends State<BackpackListItem> {
         child: Padding(
           padding: EdgeInsets.all(10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.backpack_rounded),
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${widget.title}',
-                        style: Theme.of(context).textTheme.bodyText1),
-                    Text('${widget.description}',
-                        style: Theme.of(context).textTheme.bodyText2),
-                    Text('Pack Weight (g): $_weight')
-                  ],
-                ),
-              )
+              Row(
+                children: [
+                  Icon(Icons.backpack_rounded),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${widget.title}',
+                                style: Theme.of(context).textTheme.bodyText1),
+                            Text('${widget.description}',
+                                style: Theme.of(context).textTheme.bodyText2),
+                            Text('Pack Weight (g): $_weight')
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              PopupMenuButton(
+                  onSelected: (Options result) {
+                    setState(() {
+                      switch (result) {
+                        case Options.delete:
+                          _openDeleteDialog();
+                          return;
+                        case Options.edit:
+                          return;
+                        default:
+                          return;
+                      }
+                    });
+                  },
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<Options>>[
+                        // const PopupMenuItem<options>(
+                        //     value: options.edit, child: Text('Edit')),
+                        const PopupMenuItem<Options>(
+                          value: Options.delete,
+                          child: Text('Delete'),
+                        ),
+                      ])
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _openDeleteDialog() async {
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                    text: 'Are you sure you want to delete ',
+                    style: TextStyle(fontWeight: FontWeight.normal)),
+                TextSpan(
+                    text: '${widget.title}',
+                    style: TextStyle(fontWeight: FontWeight.bold))
+              ]),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel')),
+              TextButton(
+                  onPressed: () {
+                    DB.deleteById(Backpack.table, widget.id!);
+                    widget.updateBackpackList();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Delete'))
+            ],
+          );
+        });
   }
 }

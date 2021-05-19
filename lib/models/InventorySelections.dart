@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
+import 'package:ultrapack_mobile/services/db.dart';
+
+import 'Model.dart';
 
 class InventorySelections extends ChangeNotifier {
   Set<int> inventorySelections = {};
@@ -12,7 +16,6 @@ class InventorySelections extends ChangeNotifier {
   }
 
   void toggleSelection(int id) {
-    print('toggleSelection');
     if (inventorySelections.contains(id)) {
       inventorySelections.remove(id);
     } else {
@@ -27,5 +30,13 @@ class InventorySelections extends ChangeNotifier {
 
   bool contains(int id) {
     return inventorySelections.contains(id);
+  }
+
+  void addSelectionsToPack(int backpackId) {
+    for (int id in inventorySelections) {
+      Model ibp = ItemsBackpacks(itemId: id, backpackId: backpackId);
+      DB.insert(ItemsBackpacks.table, ibp);
+    }
+    inventorySelections.clear();
   }
 }

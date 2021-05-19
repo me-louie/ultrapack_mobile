@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/models/Backpack.dart';
 import 'package:ultrapack_mobile/models/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
-import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 
@@ -151,12 +150,7 @@ class _InventoryState extends State<Inventory> {
                   (index) => SimpleDialogOption(
                       onPressed: () {
                         var selections = context.read<InventorySelections>();
-                        for (int id in selections.inventorySelections) {
-                          Model ibp = ItemsBackpacks(
-                              itemId: id, backpackId: (_backpacks[index].id)!);
-                          DB.insert(ItemsBackpacks.table, ibp);
-                        }
-                        selections.clear();
+                        selections.addSelectionsToPack(_backpacks[index].id!);
                         refresh();
                         Navigator.pop(context);
                         final snackBar = SnackBar(

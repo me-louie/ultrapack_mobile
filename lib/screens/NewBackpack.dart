@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ultrapack_mobile/models/Backpack.dart';
+import 'package:ultrapack_mobile/models/InventorySelections.dart';
+import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/db.dart';
+import 'package:provider/provider.dart';
 
+import 'Inventory.dart';
 import 'MyBackpack.dart';
 
 class NewBackpack extends StatefulWidget {
@@ -17,8 +21,22 @@ class _NewBackpackState extends State<NewBackpack> {
   final FocusNode _focusNode = FocusNode();
   List<GlobalKey<FormState>> formKeys = [
     GlobalKey<FormState>(),
+    GlobalKey<FormState>(),
     GlobalKey<FormState>()
   ];
+  List<Item> _inventory = [];
+
+  @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
+
+  void refresh() async {
+    List<Map<String, dynamic>> _results = await DB.query(Item.table);
+    _inventory = _results.map((item) => Item.fromMap(item)).toList();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,18 +57,21 @@ class _NewBackpackState extends State<NewBackpack> {
           },
           onStepContinue: () async {
             if (formKeys[_index].currentState!.validate()) {
-              if (_index >= 1) {
-                print('last');
+              if (_index >= 2) {
                 String name = _nameController.text;
                 String description = _descriptionController.text;
                 Model backpack =
                     new Backpack(name: name, description: description);
-                int id = await DB.insert(Backpack.table, backpack);
+                int backpackId = await DB.insert(Backpack.table, backpack);
+
+                var selections = context.read<InventorySelections>();
+                selections.addSelectionsToPack(backpackId);
+
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            MyBackpack(id, name, description)));
+                            MyBackpack(backpackId, name, description)));
                 return;
               }
               setState(() {
@@ -111,6 +132,22 @@ class _NewBackpackState extends State<NewBackpack> {
                         ),
                       )),
                 )),
+            Step(
+                title: Text('Add items'),
+                isActive: _index >= 2,
+                content: Form(
+                  key: formKeys[2],
+                  child: SizedBox(
+                      height: 400,
+                      child: ListView.builder(
+                          itemCount: _inventory.length,
+                          itemBuilder: (context, int index) {
+                            return InventoryItem(
+                                _inventory[index].id,
+                                _inventory[index].name,
+                                _inventory[index].weight);
+                          })),
+                ))
           ],
         )));
   }
