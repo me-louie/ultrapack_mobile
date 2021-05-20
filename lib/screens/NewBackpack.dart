@@ -89,8 +89,8 @@ class _NewBackpackState extends State<NewBackpack> {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => MyBackpack(backpackId, name,
-                                description, () => print('hi'))),
+                            builder: (context) =>
+                                MyBackpack(backpackId, name, description)),
                         ModalRoute.withName("/backpacks"));
                     return;
                   default:

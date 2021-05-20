@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
-import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
+import 'package:ultrapack_mobile/providers/BackpacksWeight.dart';
 import 'package:ultrapack_mobile/services/db.dart';
+import 'package:provider/provider.dart';
 
 class MyBackpack extends StatefulWidget {
   final String name;
   final String description;
   final int id;
-  final Function updateBackpackWeight;
 
-  MyBackpack(this.id, this.name, this.description, this.updateBackpackWeight);
+  MyBackpack(this.id, this.name, this.description);
 
   @override
   _MyBackpackState createState() => _MyBackpackState();
@@ -29,6 +29,8 @@ class _MyBackpackState extends State<MyBackpack> {
     List<Map<String, dynamic>> _results = await DB.getBackpackItems(widget.id);
     _items = _results.map((item) => Item.fromMap(item)).toList();
     _weight = await DB.getBackpackWeight(widget.id);
+    var backpackWeights = context.read<BackpacksWeight>();
+    backpackWeights.loadData();
     setState(() {});
   }
 
@@ -71,10 +73,9 @@ class _MyBackpackState extends State<MyBackpack> {
                           Dismissible(
                             key: UniqueKey(),
                             onDismissed: (direction) {
-                              DB.deleteBackpackItem(ItemsBackpacks.table,
+                              DB.deleteBackpackItem(
                                   _items[index].id!, widget.id);
                               refresh();
-                              widget.updateBackpackWeight();
                             },
                             child: ListTile(
                               title: Text(_items[index].name),

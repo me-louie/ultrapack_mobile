@@ -21,7 +21,7 @@ class BackpacksModel extends ChangeNotifier {
   }
 
   Future<int> delete(int backpackId) async {
-    int deleted = await DB.deleteById(Backpack.table, backpackId);
+    int deleted = await DB.emptyAndDeleteBackpack(backpackId);
     loadData();
     return deleted;
   }

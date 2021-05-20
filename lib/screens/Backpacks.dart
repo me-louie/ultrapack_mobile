@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:ultrapack_mobile/providers/BackpacksWeight.dart';
 import 'package:ultrapack_mobile/screens/MyBackpack.dart';
-import 'package:ultrapack_mobile/services/db.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 
 class Backpacks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var backpackWeights = context.read<BackpacksWeight>();
+    backpackWeights.loadData();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Backpacks'),
@@ -22,16 +25,19 @@ class Backpacks extends StatelessWidget {
             label: Text('Pack a new backpack'),
           ),
         ),
-        Consumer<BackpacksModel>(
-          builder: (context, myBackpacks, child) => Flexible(
+        Consumer2<BackpacksModel, BackpacksWeight>(
+          builder: (context, backpacks, backpackWeights, child) => Flexible(
               child: ListView.builder(
             padding: const EdgeInsets.all(8.0),
-            itemCount: myBackpacks.length,
+            itemCount: backpacks.length,
             itemBuilder: (BuildContext context, int index) {
+              int id = backpacks.getBackpacks[index].id!;
               return BackpackListItem(
-                  id: myBackpacks.getBackpacks[index].id,
-                  title: myBackpacks.getBackpacks[index].name,
-                  description: myBackpacks.getBackpacks[index].description);
+                id: backpacks.getBackpacks[index].id,
+                title: backpacks.getBackpacks[index].name,
+                description: backpacks.getBackpacks[index].description,
+                weight: backpackWeights.getBackpackWeight(id),
+              );
             },
           )),
         )
@@ -44,29 +50,20 @@ enum Options { edit, delete }
 
 class BackpackListItem extends StatefulWidget {
   const BackpackListItem(
-      {this.id, required this.title, required this.description});
+      {this.id,
+      required this.title,
+      required this.description,
+      required this.weight});
   final int? id;
   final String title;
   final String description;
+  final int? weight;
 
   @override
   _BackpackListItemState createState() => _BackpackListItemState();
 }
 
 class _BackpackListItemState extends State<BackpackListItem> {
-  int _weight = 0;
-
-  @override
-  void initState() {
-    refresh();
-    super.initState();
-  }
-
-  void refresh() async {
-    _weight = await DB.getBackpackWeight(widget.id!);
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -75,8 +72,8 @@ class _BackpackListItemState extends State<BackpackListItem> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MyBackpack(widget.id!, widget.title,
-                    widget.description, () => refresh())));
+                builder: (context) =>
+                    MyBackpack(widget.id!, widget.title, widget.description)));
       },
       child: Card(
         child: Padding(
@@ -100,7 +97,7 @@ class _BackpackListItemState extends State<BackpackListItem> {
                                 style: Theme.of(context).textTheme.bodyText1),
                             Text('${widget.description}',
                                 style: Theme.of(context).textTheme.bodyText2),
-                            Text('Pack Weight (g): $_weight')
+                            Text('Pack Weight (g): ${widget.weight}')
                           ],
                         ),
                       ],
@@ -110,17 +107,15 @@ class _BackpackListItemState extends State<BackpackListItem> {
               ),
               PopupMenuButton(
                   onSelected: (Options result) {
-                    setState(() {
-                      switch (result) {
-                        case Options.delete:
-                          _openDeleteDialog();
-                          return;
-                        case Options.edit:
-                          return;
-                        default:
-                          return;
-                      }
-                    });
+                    switch (result) {
+                      case Options.delete:
+                        _openDeleteDialog();
+                        return;
+                      case Options.edit:
+                        return;
+                      default:
+                        return;
+                    }
                   },
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<Options>>[

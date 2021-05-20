@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ultrapack_mobile/providers/BackpacksWeight.dart';
 import 'package:ultrapack_mobile/providers/InventorySelections.dart';
 import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
@@ -21,7 +22,8 @@ class UltrapackApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => InventorySelections()),
-        ChangeNotifierProvider(create: (context) => BackpacksModel())
+        ChangeNotifierProvider(create: (context) => BackpacksModel()),
+        ChangeNotifierProvider(create: (context) => BackpacksWeight())
       ],
       child: MaterialApp(
           title: 'ultrapack',
