@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ultrapack_mobile/models/InventorySelections.dart';
+import 'package:ultrapack_mobile/providers/BackpacksWeight.dart';
+import 'package:ultrapack_mobile/providers/InventorySelections.dart';
+import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
 import 'package:ultrapack_mobile/screens/Inventory/Inventory.dart';
 import 'package:ultrapack_mobile/screens/NewBackpack.dart';
@@ -19,7 +21,9 @@ class UltrapackApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => InventorySelections())
+        ChangeNotifierProvider(create: (context) => InventorySelections()),
+        ChangeNotifierProvider(create: (context) => BackpacksModel()),
+        ChangeNotifierProvider(create: (context) => BackpacksWeight())
       ],
       child: MaterialApp(
           title: 'ultrapack',
@@ -29,7 +33,6 @@ class UltrapackApp extends StatelessWidget {
           ),
           home: HomePage(title: 'ultrapack'),
           routes: {
-            // '/': (context) => HomePage(),
             '/inventory': (context) => Inventory(),
             '/backpacks': (context) => Backpacks(),
             '/newbackpack': (context) => NewBackpack(),
@@ -44,9 +47,12 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var backpacks = context.read<BackpacksModel>();
+    backpacks.loadData();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ultrapack'),
+        title: Text(this.title!),
       ),
       body: Center(
         child: GridView.count(

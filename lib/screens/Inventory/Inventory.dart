@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:ultrapack_mobile/models/Backpack.dart';
-import 'package:ultrapack_mobile/models/InventorySelections.dart';
+import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
+import 'package:ultrapack_mobile/providers/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/db.dart';
@@ -21,7 +21,6 @@ class _InventoryState extends State<Inventory> {
   final _formKey = GlobalKey<FormState>();
 
   List<Item> _inventory = [];
-  List<Backpack> _backpacks = [];
 
   @override
   void initState() {
@@ -159,21 +158,24 @@ class _InventoryState extends State<Inventory> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(title: Text('Backpacks'), children: <Widget>[
-            Column(
-              children: List.generate(
-                  _backpacks.length,
-                  (index) => SimpleDialogOption(
-                      onPressed: () {
-                        var selections = context.read<InventorySelections>();
-                        selections.addSelectionsToPack(_backpacks[index].id!);
-                        refresh();
-                        Navigator.pop(context);
-                        final snackBar = SnackBar(
-                            content: Text(
-                                'Items added to ${_backpacks[index].name}'));
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      },
-                      child: Text(_backpacks[index].name))),
+            Consumer<BackpacksModel>(
+              builder: (context, backpacks, child) => Column(
+                children: List.generate(
+                    backpacks.length,
+                    (index) => SimpleDialogOption(
+                        onPressed: () {
+                          var selections = context.read<InventorySelections>();
+                          selections.addSelectionsToPack(
+                              backpacks.getBackpacks[index].id!);
+                          refresh();
+                          Navigator.pop(context);
+                          final snackBar = SnackBar(
+                              content: Text(
+                                  'Items added to ${backpacks.getBackpacks[index].name}'));
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        },
+                        child: Text(backpacks.getBackpacks[index].name))),
+              ),
             )
           ]);
         });
@@ -200,10 +202,6 @@ class _InventoryState extends State<Inventory> {
   void refresh() async {
     List<Map<String, dynamic>> _results = await DB.query(Item.table);
     _inventory = _results.map((item) => Item.fromMap(item)).toList();
-
-    List<Map<String, dynamic>> _backpacksResults =
-        await DB.query(Backpack.table);
-    _backpacks = _backpacksResults.map((bp) => Backpack.fromMap(bp)).toList();
     setState(() {});
   }
 }

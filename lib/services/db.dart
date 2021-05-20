@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:ultrapack_mobile/models/Backpack.dart';
+import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 
 abstract class DB {
@@ -61,12 +63,18 @@ abstract class DB {
     return await _db.delete(table, where: 'id = ?', whereArgs: [id]);
   }
 
-  static Future<int> deleteBackpackItem(
-      String table, int itemId, int backpackId) async {
+  static Future<int> deleteBackpackItem(int itemId, int backpackId) async {
     final Database _db = (await database)!;
-    return await _db.delete(table,
+    return await _db.delete('items_backpacks',
         where: 'itemId = ? AND backpackId = ?',
         whereArgs: [itemId, backpackId]);
+  }
+
+  static Future<int> emptyAndDeleteBackpack(int backpackId) async {
+    final Database _db = (await database)!;
+    await _db.delete(ItemsBackpacks.table,
+        where: 'backpackId = ?', whereArgs: [backpackId]);
+    return await deleteById(Backpack.table, backpackId);
   }
 
   static Future<List<Map<String, dynamic>>> getBackpackItems(int id) async {
@@ -90,5 +98,16 @@ abstract class DB {
             'WHERE items_backpacks.backpackId = $id');
     int value = result[0]["TotalWeight"];
     return value;
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllBackpackWeights() async {
+    final Database _db = (await database)!;
+    List<Map<String, dynamic>> results = await _db.rawQuery(
+        'SELECT items_backpacks.backpackId, COALESCE(SUM(weight), 0) as TotalWeight '
+        'FROM items_inventory '
+        'INNER JOIN items_backpacks '
+        'ON items_inventory.id = items_backpacks.itemId '
+        'GROUP BY items_backpacks.backpackId');
+    return results;
   }
 }
