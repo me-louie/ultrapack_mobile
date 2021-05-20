@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 
-import 'Model.dart';
+import '../models/Model.dart';
 
 class InventorySelections extends ChangeNotifier {
   Set<int> inventorySelections = {};

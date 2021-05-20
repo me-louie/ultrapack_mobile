@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ultrapack_mobile/models/Backpack.dart';
 import 'package:ultrapack_mobile/screens/MyBackpack.dart';
 import 'package:ultrapack_mobile/services/db.dart';
+import 'package:provider/provider.dart';
+import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 
 class Backpacks extends StatefulWidget {
   @override
@@ -9,20 +10,6 @@ class Backpacks extends StatefulWidget {
 }
 
 class _BackpacksState extends State<Backpacks> {
-  List<Backpack> _backpacks = [];
-
-  @override
-  void initState() {
-    refresh();
-    super.initState();
-  }
-
-  void refresh() async {
-    List<Map<String, dynamic>> _results = await DB.query(Backpack.table);
-    _backpacks = _results.map((bp) => Backpack.fromMap(bp)).toList();
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,18 +27,19 @@ class _BackpacksState extends State<Backpacks> {
             label: Text('Pack a new backpack'),
           ),
         ),
-        Flexible(
-            child: ListView.builder(
-          padding: const EdgeInsets.all(8.0),
-          itemCount: _backpacks.length,
-          itemBuilder: (BuildContext context, int index) {
-            return BackpackListItem(
-                id: _backpacks[index].id,
-                title: _backpacks[index].name,
-                description: _backpacks[index].description,
-                updateBackpackList: () => {refresh()});
-          },
-        ))
+        Consumer<BackpacksModel>(
+          builder: (context, myBackpacks, child) => Flexible(
+              child: ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            itemCount: myBackpacks.length,
+            itemBuilder: (BuildContext context, int index) {
+              return BackpackListItem(
+                  id: myBackpacks.getBackpacks[index].id,
+                  title: myBackpacks.getBackpacks[index].name,
+                  description: myBackpacks.getBackpacks[index].description);
+            },
+          )),
+        )
       ]),
     );
   }
@@ -61,14 +49,10 @@ enum Options { edit, delete }
 
 class BackpackListItem extends StatefulWidget {
   const BackpackListItem(
-      {this.id,
-      required this.title,
-      required this.description,
-      required this.updateBackpackList});
+      {this.id, required this.title, required this.description});
   final int? id;
   final String title;
   final String description;
-  final Function updateBackpackList;
 
   @override
   _BackpackListItemState createState() => _BackpackListItemState();
@@ -182,8 +166,8 @@ class _BackpackListItemState extends State<BackpackListItem> {
                   child: Text('Cancel')),
               TextButton(
                   onPressed: () {
-                    DB.deleteById(Backpack.table, widget.id!);
-                    widget.updateBackpackList();
+                    var myBackpacks = context.read<BackpacksModel>();
+                    myBackpacks.delete(widget.id!);
                     Navigator.of(context).pop();
                   },
                   child: Text('Delete'))

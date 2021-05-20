@@ -70,7 +70,6 @@ class _MyBackpackState extends State<MyBackpack> {
                           Dismissible(
                             key: UniqueKey(),
                             onDismissed: (direction) {
-                              print(_items[index].id);
                               DB.deleteBackpackItem(ItemsBackpacks.table,
                                   _items[index].id!, widget.id);
                               refresh();
