@@ -26,10 +26,21 @@ abstract class DB {
             'id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'name STRING, '
             'description STRING)');
+
         await db.execute('CREATE TABLE items_backpacks ('
             'itemId INTEGER, '
             'backpackId INTEGER, '
             'PRIMARY KEY(itemId, backpackId))');
+
+        await db.execute('CREATE TABLE categories ('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+            'name STRING,'
+            'tagColor INTEGER)');
+
+        await db.execute('CREATE TABLE items_categories ('
+            'itemId INTEGER,'
+            'categoryId INTEGER,'
+            'PRIMARY KEY(itemId, categoryId))');
       }, version: 1);
     } catch (ex) {
       print(ex);

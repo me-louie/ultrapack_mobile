@@ -5,6 +5,7 @@ import 'package:ultrapack_mobile/providers/BackpacksWeight.dart';
 import 'package:ultrapack_mobile/providers/InventorySelections.dart';
 import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 import 'package:ultrapack_mobile/screens/Backpacks.dart';
+import 'package:ultrapack_mobile/screens/Categories.dart';
 import 'package:ultrapack_mobile/screens/Inventory/Inventory.dart';
 import 'package:ultrapack_mobile/screens/NewBackpack.dart';
 import 'package:ultrapack_mobile/services/db.dart';
@@ -36,6 +37,7 @@ class UltrapackApp extends StatelessWidget {
             '/inventory': (context) => Inventory(),
             '/backpacks': (context) => Backpacks(),
             '/newbackpack': (context) => NewBackpack(),
+            '/categories': (context) => Categories(),
           }),
     );
   }
@@ -75,6 +77,14 @@ class HomePage extends StatelessWidget {
                   Navigator.pushNamed(context, '/backpacks');
                 },
                 child: Text('Backpacks')),
+            ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.amber)),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/categories');
+                },
+                child: Text('Categories')),
           ],
         ),
       ),

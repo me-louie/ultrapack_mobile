@@ -142,7 +142,7 @@ class _InventoryState extends State<Inventory> {
             Container(
                 margin: EdgeInsets.symmetric(horizontal: 4.0),
                 child: IconButton(
-                    icon: const Icon(Icons.add_circle_outline_outlined),
+                    icon: const Icon(Icons.add_outlined),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _handleSubmitted(_textController.text,
