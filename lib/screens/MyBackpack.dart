@@ -25,7 +25,7 @@ class _MyBackpackState extends State<MyBackpack> {
     super.initState();
   }
 
-  void refresh() async {
+  Future<void> refresh() async {
     List<Map<String, dynamic>> _results = await DB.getBackpackItems(widget.id);
     _items = _results.map((item) => Item.fromMap(item)).toList();
     _weight = await DB.getBackpackWeight(widget.id);
@@ -72,7 +72,7 @@ class _MyBackpackState extends State<MyBackpack> {
                         children: [
                           Dismissible(
                             key: UniqueKey(),
-                            onDismissed: (direction) {
+                            onDismissed: (direction) async {
                               DB.deleteBackpackItem(
                                   _items[index].id!, widget.id);
                               refresh();

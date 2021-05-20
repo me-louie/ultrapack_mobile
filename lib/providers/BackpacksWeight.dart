@@ -5,6 +5,7 @@ class BackpacksWeight extends ChangeNotifier {
   Map<int, int> weightsMap = {};
 
   void loadData() async {
+    weightsMap.clear();
     List<Map<String, dynamic>> list = await DB.getAllBackpackWeights();
     list.forEach((i) => weightsMap[i['backpackId']] = i['TotalWeight']);
     notifyListeners();
