@@ -7,8 +7,9 @@ class MyBackpack extends StatefulWidget {
   final String name;
   final String description;
   final int id;
+  final Function updateBackpackWeight;
 
-  MyBackpack(this.id, this.name, this.description);
+  MyBackpack(this.id, this.name, this.description, this.updateBackpackWeight);
 
   @override
   _MyBackpackState createState() => _MyBackpackState();
@@ -73,6 +74,7 @@ class _MyBackpackState extends State<MyBackpack> {
                               DB.deleteBackpackItem(ItemsBackpacks.table,
                                   _items[index].id!, widget.id);
                               refresh();
+                              widget.updateBackpackWeight();
                             },
                             child: ListTile(
                               title: Text(_items[index].name),

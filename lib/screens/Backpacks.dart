@@ -4,12 +4,7 @@ import 'package:ultrapack_mobile/services/db.dart';
 import 'package:provider/provider.dart';
 import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 
-class Backpacks extends StatefulWidget {
-  @override
-  _BackpacksState createState() => _BackpacksState();
-}
-
-class _BackpacksState extends State<Backpacks> {
+class Backpacks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,8 +75,8 @@ class _BackpackListItemState extends State<BackpackListItem> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    MyBackpack(widget.id!, widget.title, widget.description)));
+                builder: (context) => MyBackpack(widget.id!, widget.title,
+                    widget.description, () => refresh())));
       },
       child: Card(
         child: Padding(
@@ -166,8 +161,8 @@ class _BackpackListItemState extends State<BackpackListItem> {
                   child: Text('Cancel')),
               TextButton(
                   onPressed: () {
-                    var myBackpacks = context.read<BackpacksModel>();
-                    myBackpacks.delete(widget.id!);
+                    var backpacks = context.read<BackpacksModel>();
+                    backpacks.delete(widget.id!);
                     Navigator.of(context).pop();
                   },
                   child: Text('Delete'))

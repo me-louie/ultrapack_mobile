@@ -47,7 +47,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     var backpacks = context.read<BackpacksModel>();
     backpacks.loadData();
-    print('LOADED');
+
     return Scaffold(
       appBar: AppBar(
         title: Text(this.title!),
