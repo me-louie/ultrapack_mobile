@@ -5,6 +5,7 @@ import 'package:ultrapack_mobile/providers/BackpacksModel.dart';
 import 'package:ultrapack_mobile/providers/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
+import 'package:ultrapack_mobile/screens/Inventory/EditItemCategoryDialog.dart';
 import 'package:ultrapack_mobile/services/db.dart';
 
 import 'EditInventoryItemDialog.dart';
@@ -46,6 +47,12 @@ class _InventoryState extends State<Inventory> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              // IconButton(
+              //   icon: Icon(Icons.add_outlined),
+              //   onPressed: () {
+              //     _openBackpackDialog();
+              //   },
+              // ),
               ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     primary: Theme.of(context).accentColor, // background
@@ -139,16 +146,27 @@ class _InventoryState extends State<Inventory> {
                 ),
               ),
             ),
-            Container(
-                margin: EdgeInsets.symmetric(horizontal: 4.0),
-                child: IconButton(
-                    icon: const Icon(Icons.add_outlined),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _handleSubmitted(_textController.text,
-                            int.tryParse(_weightController.text)!);
-                      }
-                    }))
+            Row(
+                //     margin: EdgeInsets.symmetric(horizontal: 4.0),
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.tag),
+                    onPressed: () async {
+                      print('tag dialog');
+                      await showDialog(
+                          context: context,
+                          builder: (_) => EditItemCategoryDialog());
+                    },
+                  ),
+                  IconButton(
+                      icon: const Icon(Icons.add_outlined),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _handleSubmitted(_textController.text,
+                              int.tryParse(_weightController.text)!);
+                        }
+                      })
+                ])
           ],
         ));
   }
@@ -240,7 +258,7 @@ class _InventoryItemState extends State<InventoryItem> {
               var selections = context.read<InventorySelections>();
               selections.toggleSelection(widget.id!);
             },
-            secondary: const Icon(Icons.wb_sunny),
+            // secondary: const Icon(Icons.wb_sunny),
           ),
           Divider(
             height: 2.0,
