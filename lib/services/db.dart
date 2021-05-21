@@ -76,6 +76,14 @@ abstract class DB {
     return await _db.delete(table, where: 'id = ?', whereArgs: [id]);
   }
 
+  static Future<List<Object?>> bulkDeleteById(
+      String table, Set<int> ids) async {
+    final Database _db = (await database)!;
+    Batch batch = _db.batch();
+    ids.forEach((id) => batch.delete(table, where: 'id = ?', whereArgs: [id]));
+    return await batch.commit(noResult: true);
+  }
+
   static Future<int> deleteBackpackItem(int itemId, int backpackId) async {
     final Database _db = (await database)!;
     return await _db.delete('items_backpacks',

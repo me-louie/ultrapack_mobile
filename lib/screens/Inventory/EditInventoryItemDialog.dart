@@ -4,7 +4,7 @@ import 'package:ultrapack_mobile/models/Category.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/services/CategoryService.dart';
-import 'package:ultrapack_mobile/services/db.dart';
+import 'package:ultrapack_mobile/services/ItemService.dart';
 
 class EditInventoryItemDialog extends StatefulWidget {
   final Item item;
@@ -141,7 +141,7 @@ class _EditInventoryItemDialogState extends State<EditInventoryItemDialog> {
           id: widget.item.id,
           name: _editNameController.text,
           weight: int.tryParse(_editWeightController.text)!);
-      DB.update(Item.table, updated);
+      ItemService.updateItem(updated);
       widget.updateInventoryList();
     }
   }

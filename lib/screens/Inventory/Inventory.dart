@@ -6,7 +6,7 @@ import 'package:ultrapack_mobile/providers/InventorySelections.dart';
 import 'package:ultrapack_mobile/models/Item.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 import 'package:ultrapack_mobile/screens/Inventory/EditItemCategoryDialog.dart';
-import 'package:ultrapack_mobile/services/db.dart';
+import 'package:ultrapack_mobile/services/ItemService.dart';
 
 import 'EditInventoryItemDialog.dart';
 
@@ -77,12 +77,12 @@ class _InventoryState extends State<Inventory> {
         Flexible(
             child: ListView.builder(
           padding: EdgeInsets.all(8.0),
-          itemBuilder: (context, int index) {
-            final item = _inventory[index];
+          itemBuilder: (context, int i) {
+            final item = _inventory[i];
             return Dismissible(
               key: UniqueKey(),
               onDismissed: (direction) {
-                DB.delete(Item.table, item);
+                ItemService.delete(item);
                 refresh();
               },
               child: GestureDetector(
@@ -203,23 +203,19 @@ class _InventoryState extends State<Inventory> {
     _textController.clear();
     _weightController.clear();
     Model item = Item(name: text, weight: weight);
-    await DB.insert(Item.table, item);
-    setState(() {});
+    ItemService.insert(item);
     refresh();
     _focusNode.requestFocus();
   }
 
   void _deleteSelections() async {
     var selections = context.read<InventorySelections>();
-    for (int id in selections.inventorySelections) {
-      DB.deleteById(Item.table, id);
-    }
+    ItemService.bulkDelete(selections.inventorySelections);
     refresh();
   }
 
   void refresh() async {
-    List<Map<String, dynamic>> _results = await DB.query(Item.table);
-    _inventory = _results.map((item) => Item.fromMap(item)).toList();
+    _inventory = await ItemService.fetchInventoryItems();
     setState(() {});
   }
 }
