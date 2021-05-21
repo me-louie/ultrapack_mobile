@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:ultrapack_mobile/models/Backpack.dart';
+import 'package:ultrapack_mobile/models/Category.dart';
 import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
+import 'package:ultrapack_mobile/models/ItemsCategories.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 
 abstract class DB {
@@ -120,5 +122,30 @@ abstract class DB {
         'ON items_inventory.id = items_backpacks.itemId '
         'GROUP BY items_backpacks.backpackId');
     return results;
+  }
+
+  static Future<List<Map<String, dynamic>>> getItemCategories(
+      int itemId) async {
+    final Database _db = (await database)!;
+    List<Map<String, dynamic>> list = await _db
+        .rawQuery('SELECT categories.name, categories.tagColor, categories.id '
+            'FROM categories '
+            'INNER JOIN items_categories '
+            'ON categories.id = items_categories.categoryId '
+            'WHERE items_categories.itemId = $itemId');
+    return list;
+  }
+
+  static Future<List<Object?>> updateItemCategories(
+      int itemId, Set<Category> catsToAdd, Set<Category> catsToRemove) async {
+    final Database _db = (await database)!;
+
+    Batch batch = _db.batch();
+    catsToAdd.forEach((cat) => batch.insert(ItemsCategories.table,
+        ItemsCategories(itemId: itemId, categoryId: (cat.id)!).toMap()));
+
+    catsToRemove.forEach((cat) => batch.delete(ItemsCategories.table,
+        where: 'itemId = ? AND categoryId = ?', whereArgs: [itemId, cat.id]));
+    return await batch.commit(noResult: true);
   }
 }

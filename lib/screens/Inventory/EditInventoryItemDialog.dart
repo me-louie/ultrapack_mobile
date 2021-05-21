@@ -21,7 +21,9 @@ class EditInventoryItemDialog extends StatefulWidget {
 class _EditInventoryItemDialogState extends State<EditInventoryItemDialog> {
   final _editNameController = TextEditingController();
   final _editWeightController = TextEditingController();
-  List<Category> _categories = [];
+  List<Category> _allCategories = [];
+  List<Category> _selectedCategories = [];
+  Set<Category> _initialCategorySet = {};
 
   @override
   void initState() {
@@ -37,7 +39,10 @@ class _EditInventoryItemDialogState extends State<EditInventoryItemDialog> {
   }
 
   void refresh() async {
-    _categories = await CategoryService.fetchCategories();
+    _allCategories = await CategoryService.fetchCategories();
+    _selectedCategories =
+        await CategoryService.getItemCategories(widget.item.id!);
+    _initialCategorySet = _selectedCategories.toSet();
     setState(() {});
   }
 
@@ -72,15 +77,22 @@ class _EditInventoryItemDialogState extends State<EditInventoryItemDialog> {
                   labelText: 'Weight (g)'),
             ),
             Wrap(
-                children: List.generate(_categories.length, (int index) {
+                children: List.generate(_allCategories.length, (int i) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: FilterChip(
-                  label: Text(_categories[index].name),
-                  backgroundColor: Color(_categories[index].tagColor),
-                  selected: false,
+                  label: Text(_allCategories[i].name),
+                  backgroundColor: Color(_allCategories[i].tagColor),
+                  selected: _selectedCategories.contains(_allCategories[i]),
                   onSelected: (bool value) {
-                    print(value);
+                    if (value) {
+                      _selectedCategories.add(_allCategories[i]);
+                    } else {
+                      _selectedCategories.remove(_allCategories[i]);
+                    }
+                    setState(() {});
+                    print('ON CLICK, # selected:');
+                    print(_selectedCategories.length);
                   },
                 ),
               );
@@ -99,15 +111,8 @@ class _EditInventoryItemDialogState extends State<EditInventoryItemDialog> {
         TextButton(
           child: Text('Confirm'),
           onPressed: () {
-            if (initialName != _editNameController.text ||
-                initialWeight != _editWeightController.text) {
-              Model updated = Item(
-                  id: widget.item.id,
-                  name: _editNameController.text,
-                  weight: int.tryParse(_editWeightController.text)!);
-              DB.update(Item.table, updated);
-              widget.updateInventoryList();
-            }
+            _updateCategories();
+            _updateItem(initialName, initialWeight);
             Navigator.of(context).pop();
           },
         ),
@@ -116,5 +121,28 @@ class _EditInventoryItemDialogState extends State<EditInventoryItemDialog> {
     //   },
     // );
   }
-  // }
+
+  Future<List<Object?>?> _updateCategories() async {
+    Set<Category> _selectedSet = _selectedCategories.toSet();
+    if (_selectedSet.containsAll(_initialCategorySet) &&
+        _initialCategorySet.containsAll(_selectedSet)) {
+      return null;
+    }
+    Set<Category> catsToAdd = _selectedSet.difference(_initialCategorySet);
+    Set<Category> catsToRemove = _initialCategorySet.difference(_selectedSet);
+    return await CategoryService.updateItemCategories(
+        widget.item.id!, catsToAdd, catsToRemove);
+  }
+
+  void _updateItem(String initialName, String initialWeight) {
+    if (initialName != _editNameController.text ||
+        initialWeight != _editWeightController.text) {
+      Model updated = Item(
+          id: widget.item.id,
+          name: _editNameController.text,
+          weight: int.tryParse(_editWeightController.text)!);
+      DB.update(Item.table, updated);
+      widget.updateInventoryList();
+    }
+  }
 }
