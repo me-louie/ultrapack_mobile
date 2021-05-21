@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:ultrapack_mobile/models/Backpack.dart';
+import 'package:ultrapack_mobile/models/Category.dart';
 import 'package:ultrapack_mobile/models/ItemsBackpacks.dart';
+import 'package:ultrapack_mobile/models/ItemsCategories.dart';
 import 'package:ultrapack_mobile/models/Model.dart';
 
 abstract class DB {
@@ -26,10 +28,21 @@ abstract class DB {
             'id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'name STRING, '
             'description STRING)');
+
         await db.execute('CREATE TABLE items_backpacks ('
             'itemId INTEGER, '
             'backpackId INTEGER, '
             'PRIMARY KEY(itemId, backpackId))');
+
+        await db.execute('CREATE TABLE categories ('
+            'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+            'name STRING,'
+            'tagColor INTEGER)');
+
+        await db.execute('CREATE TABLE items_categories ('
+            'itemId INTEGER,'
+            'categoryId INTEGER,'
+            'PRIMARY KEY(itemId, categoryId))');
       }, version: 1);
     } catch (ex) {
       print(ex);
@@ -61,6 +74,14 @@ abstract class DB {
   static Future<int> deleteById(String table, int id) async {
     final Database _db = (await database)!;
     return await _db.delete(table, where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<List<Object?>> bulkDeleteById(
+      String table, Set<int> ids) async {
+    final Database _db = (await database)!;
+    Batch batch = _db.batch();
+    ids.forEach((id) => batch.delete(table, where: 'id = ?', whereArgs: [id]));
+    return await batch.commit(noResult: true);
   }
 
   static Future<int> deleteBackpackItem(int itemId, int backpackId) async {
@@ -109,5 +130,30 @@ abstract class DB {
         'ON items_inventory.id = items_backpacks.itemId '
         'GROUP BY items_backpacks.backpackId');
     return results;
+  }
+
+  static Future<List<Map<String, dynamic>>> getItemCategories(
+      int itemId) async {
+    final Database _db = (await database)!;
+    List<Map<String, dynamic>> list = await _db
+        .rawQuery('SELECT categories.name, categories.tagColor, categories.id '
+            'FROM categories '
+            'INNER JOIN items_categories '
+            'ON categories.id = items_categories.categoryId '
+            'WHERE items_categories.itemId = $itemId');
+    return list;
+  }
+
+  static Future<List<Object?>> updateItemCategories(
+      int itemId, Set<Category> catsToAdd, Set<Category> catsToRemove) async {
+    final Database _db = (await database)!;
+
+    Batch batch = _db.batch();
+    catsToAdd.forEach((cat) => batch.insert(ItemsCategories.table,
+        ItemsCategories(itemId: itemId, categoryId: (cat.id)!).toMap()));
+
+    catsToRemove.forEach((cat) => batch.delete(ItemsCategories.table,
+        where: 'itemId = ? AND categoryId = ?', whereArgs: [itemId, cat.id]));
+    return await batch.commit(noResult: true);
   }
 }
